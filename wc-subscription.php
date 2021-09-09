@@ -1,6 +1,6 @@
 <?php
 /*
-  Plugin Name: WP Subscription
+  Plugin Name: WC Subscription
   Plugin URI: https://github.com/softlibrary/wc-subscription
   Description: This extend WooCommerce to be able pricing the product in subscription or recurring.
   Version: 0.1
@@ -38,7 +38,11 @@ class WC_SUBSCRIPTION
 {
   function __construct()
   {
+
+    add_action('woocommerce_variation_options', array($this, 'add_custom_variation_options'), 10, 3);
+
     add_action('admin_init', array($this, 'child_plugin_require_notice'));
+    add_action('product_type_options', array($this, 'add_custom_product_type_options'));
     add_action('woocommerce_product_after_variable_attributes', array($this, 'add_custom_product_variable_attributes_fields'), 2);
   }
 
@@ -73,8 +77,29 @@ class WC_SUBSCRIPTION
 
     woocommerce_wp_subscription_input(array(
       'id' => 'wp-subscription-product-variable-attributes-fields',
-      'label' => __ ('Subscriptions price ($)'),
+      'label' => __('Subscriptions price ($)'),
     ));
+  }
+
+  function add_custom_variation_options($loop, $variation_data, $variation): void
+  {
+    // $is_subscription = yit_get_prop($variation, '_ywsbs_subscription');
+    // $checked         = checked($is_subscription, 'yes', false);
+    echo '<label><input type="checkbox" class="checkbox" />Subscription</label>'; // phpcs:ignore
+  }
+
+  function add_custom_product_type_options($types): array
+  {
+    $types['ywsbs_subscription'] = array(
+      'id'            => '_ywsbs_subscription',
+      'class'         => 'checkbox_ywsbs_subscription',
+      'wrapper_class' => 'show_if_simple',
+      'label'         => esc_html__('Subscription', 'yith-woocommerce-subscription'),
+      'description'   => esc_html__('Create a subscription for this product', 'yith-woocommerce-subscription'),
+      'default'       => 'no',
+    );
+
+    return $types;
   }
 }
 
